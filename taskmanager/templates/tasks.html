@@ -11,4 +11,19 @@
     </div>
 </div>
 
+<div class="row">
+    <ul class="collapsible">
+        {% for task in tasks %}
+        <li>
+          <div class="collapsible-header matred white-text"><i class="fas fa-caret-down white-text"></i>{{ task.task_name }}: {{ task.due_date }}
+            {% if task.is_urgent %}
+            <i class="fas fa-circle-exclamation"></i>
+            {% endif %}
+          </div>
+          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+        </li>
+        {% endfor %}
+      </ul>
+</div>
+
 {% endblock %}
