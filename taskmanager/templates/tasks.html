@@ -20,8 +20,23 @@
             <i class="fas fa-circle-exclamation"></i>
             {% endif %}
           </div>
-          <div class="collapsible-body"><span>Lorem ipsum dolor sit amet.</span></div>
+          <div class="collapsible-body">
+            <h3>{{ categories|map(id == task.category_id)|attr("category_name")|string }}</h3>
+            <p>{{ task.task_description }}</p>
+            <a href="" class="btn green accent-4">Edit</a>
+            <a href="#modal-{{ task.id }}" class="btn red modal-trigger">Delete</a>
+          </div>
         </li>
+        <div id="modal-{{ task.id }}" class="modal">
+            <div class="modal-content">
+              <h4>Are you sure you want to delete this task?</h4>
+              <p>This will delete the task permanently.</p>
+            </div>
+            <div class="modal-footer">
+              <a href="#!" class="btn grey modal-close">Cancel</a>
+              <a href="{{ url_for('delete_task', task_id=task.id) }}" class="waves-effect red btn">Delete</a>
+            </div>
+          </div>
         {% endfor %}
       </ul>
 </div>

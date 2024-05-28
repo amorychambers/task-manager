@@ -9,12 +9,12 @@ document.addEventListener('DOMContentLoaded', function() {
     M.Datepicker.init(datepicker, {format: "dd mmmm, yyyy", i18n: {done: "Select"}})
     M.FormSelect.init(selector)
     M.Collapsible.init(collapsible, {
-      onOpenEnd: function(e){
+      onOpenStart: function(e){
         let div = e.firstElementChild
         let icon = div.firstElementChild
         icon.classList.remove("fa-caret-down")
         icon.classList.add("fa-caret-right")
-    }, onCloseEnd: function(e){
+    }, onCloseStart: function(e){
         let div = e.firstElementChild
         let icon = div.firstElementChild
         icon.classList.remove("fa-caret-right")
