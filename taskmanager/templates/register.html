@@ -3,6 +3,15 @@
 
 <h3 class="center-align">Register</h3>
 <div class="row">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
     <form class="col s12 m8 offset-m2" method="POST" action="{{ url_for('register') }}">
         <div class="card-panel">
             <div class="row">
@@ -25,8 +34,5 @@
         </div>
     </form>
 </div>
-{% for user in users %}
-    <h3>{{ user.username }}</h3>
-{% endfor %}
 
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from taskmanager import app, db
-from taskmanager.models import Category, Task, User
+from taskmanager.models import Category, Task, Reader
 from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route("/")
@@ -10,20 +10,22 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    users = list(User.query.all())
+    readers = list(Reader.query.all())
     if request.method == "POST":
         # Check if username already exists
-        existing_user = db.session.query(User).filter(
-            User.username == request.form.get("username").lower())
-        if db.session.query(existing_user.exists()):
+        q = db.session.query(Reader.id).filter(Reader.username==request.form.get("username").lower())
+        if db.session.query(q.exists()).scalar():
             flash("Username already taken")
-            return redirect(url_for("register"))
-        user = User(username=request.form.get("username").lower(), password=generate_password_hash(request.form.get("password")))
-        db.session.add(user)
-        db.session.commit()
-        return redirect(url_for("home"))
+            redirect(url_for("register"))
+        else:
+            reader = Reader(
+                username=request.form.get("username").lower(),
+                password=generate_password_hash(request.form.get("password")))
+            db.session.add(reader)
+            db.session.commit()
+            return redirect(url_for("home"))
 
-    return render_template("register.html", users=users)
+    return render_template("register.html", readers=readers)
 
 @app.route("/categories")
 def categories():
