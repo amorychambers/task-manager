@@ -1,6 +1,6 @@
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, flash
 from taskmanager import app, db
-from taskmanager.models import Category, Task
+from taskmanager.models import Category, Task, User
 from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route("/")
@@ -10,7 +10,20 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    return render_template("register.html")
+    users = list(User.query.all())
+    if request.method == "POST":
+        # Check if username already exists
+        existing_user = db.session.query(User).filter(
+            User.username == request.form.get("username").lower())
+        if db.session.query(existing_user.exists()):
+            flash("Username already taken")
+            return redirect(url_for("register"))
+        user = User(username=request.form.get("username").lower(), password=generate_password_hash(request.form.get("password")))
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for("home"))
+
+    return render_template("register.html", users=users)
 
 @app.route("/categories")
 def categories():
