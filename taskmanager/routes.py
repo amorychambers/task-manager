@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from taskmanager import app, db
 from taskmanager.models import Category, Task, Reader
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -26,7 +26,7 @@ def register():
             db.session.add(reader)
             db.session.commit()
             flash("Registration successful!")
-            return redirect(url_for("profile", username=db.session.user))
+            return redirect(url_for("profile", username=session["user"]))
 
     return render_template("register.html", readers=readers)
 
@@ -39,9 +39,9 @@ def login():
         if db.session.query(q.exists()).scalar():
             # Check password is correct
             if check_password_hash(q.first().password, request.form.get("password")):
-                db.session.user = request.form.get("username").lower()
+                session["user"] = request.form.get("username").lower()
                 flash("Welcome, {}".format(request.form.get("username")))
-                return redirect(url_for("profile", username=db.session.user))
+                return redirect(url_for("profile", username=session["user"]))
             else:
             # Password is not correct
                 flash("Incorrect Username and/or Password")
@@ -57,10 +57,20 @@ def login():
 
 @app.route("/profile/<username>", methods=["GET", "POST"])
 def profile(username):
-    # Find session user's username in the database
-    username = db.session.query(Reader).filter(
-        Reader.username == db.session.user).first().username
-    return render_template("profile.html", username=username)
+    if session["user"]:
+        # Find session user's username in the database
+        username = db.session.query(Reader).filter(
+        Reader.username == session["user"]).first().username
+        return render_template("profile.html", username=username)
+    else:
+        return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    flash("You have been logged out")
+    session.clear()
+    return render_template("login.html")
 
 
 @app.route("/categories")
