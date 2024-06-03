@@ -57,19 +57,19 @@ def login():
 
 @app.route("/profile/<username>", methods=["GET", "POST"])
 def profile(username):
+    # Find session user's username in the database
+    username = db.session.query(Reader).filter(
+    Reader.username == session["user"]).first().username
     if session["user"]:
-        # Find session user's username in the database
-        username = db.session.query(Reader).filter(
-        Reader.username == session["user"]).first().username
         return render_template("profile.html", username=username)
     else:
-        return render_template("login.html")
+        return redirect(url_for("login"))
 
 
 @app.route("/logout")
 def logout():
-    flash("You have been logged out")
     session.clear()
+    flash("You have been logged out")
     return render_template("login.html")
 
 
