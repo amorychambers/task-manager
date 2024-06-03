@@ -3,10 +3,12 @@ from taskmanager import app, db
 from taskmanager.models import Category, Task, Reader
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 @app.route("/")
 def home():
     tasks = list(Task.query.order_by(Task.due_date).all())
     return render_template("tasks.html", tasks=tasks)
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -27,6 +29,30 @@ def register():
 
     return render_template("register.html", readers=readers)
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        # Check that username exists
+        q = db.session.query(Reader).filter(Reader.username==request.form.get("username").lower())
+        if db.session.query(q.exists()).scalar():
+            # Check password is correct
+            if check_password_hash(q.first().password, request.form.get("password")):
+                db.session.user = request.form.get("username").lower()
+                flash("Welcome, {}".format(request.form.get("username")))
+            else:
+            # Password is not correct
+                flash("Incorrect Username and/or Password")
+                return redirect(url_for("login"))
+        
+        else:
+            # Username does not exist
+            flash("Incorrect Username and/or Password")
+            return redirect(url_for("login"))
+            
+    return render_template("login.html")
+
+
 @app.route("/categories")
 def categories():
     categories = list(Category.query.order_by(Category.category_name).all())
@@ -41,6 +67,7 @@ def add_category():
         return redirect(url_for("categories"))
     return render_template("add_category.html")
 
+
 @app.route("/edit_category/<int:category_id>", methods=["GET", "POST"])
 def edit_category(category_id):
     category = Category.query.get_or_404(category_id)
@@ -50,12 +77,14 @@ def edit_category(category_id):
         return redirect(url_for("categories"))
     return render_template("edit_category.html", category=category)
 
+
 @app.route("/delete_category/<int:category_id>")
 def delete_category(category_id):
     category = Category.query.get_or_404(category_id)
     db.session.delete(category)
     db.session.commit()
     return redirect(url_for("categories"))
+
 
 @app.route("/add_task", methods=["GET", "POST"])
 def add_task():
@@ -73,12 +102,14 @@ def add_task():
         return redirect(url_for("home"))
     return render_template("add_task.html", categories=categories)
 
+
 @app.route("/delete_task/<int:task_id>")
 def delete_task(task_id):
     task = Task.query.get_or_404(task_id)
     db.session.delete(task)
     db.session.commit()
     return redirect(url_for("home"))
+
 
 @app.route("/edit_task/<int:task_id>", methods=["GET", "POST"])
 def edit_task(task_id):
