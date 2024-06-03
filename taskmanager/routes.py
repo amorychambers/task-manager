@@ -25,7 +25,8 @@ def register():
                 password=generate_password_hash(request.form.get("password")))
             db.session.add(reader)
             db.session.commit()
-            return redirect(url_for("home"))
+            flash("Registration successful!")
+            return redirect(url_for("profile", username=db.session.user))
 
     return render_template("register.html", readers=readers)
 
@@ -40,6 +41,7 @@ def login():
             if check_password_hash(q.first().password, request.form.get("password")):
                 db.session.user = request.form.get("username").lower()
                 flash("Welcome, {}".format(request.form.get("username")))
+                return redirect(url_for("profile", username=db.session.user))
             else:
             # Password is not correct
                 flash("Incorrect Username and/or Password")
@@ -51,6 +53,14 @@ def login():
             return redirect(url_for("login"))
             
     return render_template("login.html")
+
+
+@app.route("/profile/<username>", methods=["GET", "POST"])
+def profile(username):
+    # Find session user's username in the database
+    username = db.session.query(Reader).filter(
+        Reader.username == db.session.user).first().username
+    return render_template("profile.html", username=username)
 
 
 @app.route("/categories")
