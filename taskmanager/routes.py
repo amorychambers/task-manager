@@ -6,7 +6,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route("/")
 def home():
-    tasks = list(Task.query.order_by(Task.due_date).filter(Task.task_owner == session["user"]))
+    if bool(session):
+        tasks = list(Task.query.order_by(Task.due_date).filter(Task.task_owner == session["user"]))
+    else:
+        tasks = []
     return render_template("tasks.html", tasks=tasks)
 
 
@@ -25,6 +28,7 @@ def register():
                 password=generate_password_hash(request.form.get("password")))
             db.session.add(reader)
             db.session.commit()
+            session["user"] = request.form.get("username").lower()
             flash("Registration successful!")
             return redirect(url_for("profile", username=session["user"]))
 

@@ -3,6 +3,7 @@
 
 <h3 class="center-align">Tasks</h3>
 
+{% if session["user"] %}
 <div class="row">
     <div class="col s12 center-align">
         <a href="{{ url_for('add_task') }}" class="btn-large matred darken-2">
@@ -10,6 +11,7 @@
         </a>
     </div>
 </div>
+{% endif %}
 
 <div class="row">
     <ul class="collapsible">
