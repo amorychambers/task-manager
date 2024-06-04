@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 @app.route("/")
 def home():
-    tasks = list(Task.query.order_by(Task.due_date).all())
+    tasks = list(Task.query.order_by(Task.due_date).filter(Task.task_owner == session["user"]))
     return render_template("tasks.html", tasks=tasks)
 
 
@@ -75,13 +75,13 @@ def logout():
 
 @app.route("/categories")
 def categories():
-    categories = list(Category.query.order_by(Category.category_name).all())
+    categories = list(Category.query.order_by(Category.category_name).filter(Category.category_owner == session["user"]))
     return render_template("categories.html", categories=categories)
 
 @app.route("/add_category", methods=["GET", "POST"])
 def add_category():
     if request.method == "POST":
-        category = Category(category_name=request.form.get("category_name"))
+        category = Category(category_name=request.form.get("category_name"), category_owner=session["user"])
         db.session.add(category)
         db.session.commit()
         return redirect(url_for("categories"))
@@ -108,14 +108,15 @@ def delete_category(category_id):
 
 @app.route("/add_task", methods=["GET", "POST"])
 def add_task():
-    categories = list(Category.query.order_by(Category.category_name).all())
+    categories = list(Category.query.order_by(Category.category_name).filter(Category.category_owner==session["user"]))
     if request.method == "POST":
         task = Task(
             task_name=request.form.get("task_name"),
             task_description=request.form.get("task_description"),
             is_urgent=bool(True if request.form.get("is_urgent") else False),
             due_date=request.form.get("due_date"),
-            category_id=request.form.get("category_id")
+            category_id=request.form.get("category_id"),
+            task_owner=session["user"]
             )
         db.session.add(task)
         db.session.commit()
@@ -133,7 +134,7 @@ def delete_task(task_id):
 
 @app.route("/edit_task/<int:task_id>", methods=["GET", "POST"])
 def edit_task(task_id):
-    categories = list(Category.query.order_by(Category.category_name).all())
+    categories = list(Category.query.order_by(Category.category_name).filter(Category.category_owner==session["user"]))
     task = Task.query.get_or_404(task_id)
     if request.method == "POST":
         task.task_name = request.form.get("task_name")
